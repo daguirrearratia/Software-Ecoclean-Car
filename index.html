@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecoclean Car - POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+
+    <div class="p-6 max-w-5xl mx-auto print:hidden">
+      <!-- Encabezado Profesional -->
+      <header class="flex justify-between items-center border-b-2 border-orange-500 pb-4 mb-6">
+        <div>
+          <h1 class="text-3xl font-black text-slate-800 tracking-wider">ECOCLEAN <span class="text-orange-600">CAR</span></h1>
+          <p class="text-xs text-gray-500 font-semibold tracking-widest uppercase mt-0.5">Sistema Interno de Gestión POS / ERP</p>
+        </div>
+        <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm animate-pulse">TERMINAL ACTIVA</span>
+      </header>
+
+      <form id="pos-form" onsubmit="procesarVenta(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Control Interno (Vendedor) -->
+        <div class="md:col-span-2 bg-gradient-to-r from-slate-700 to-slate-800 p-4 rounded-xl text-white shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-2">
+            <span class="text-orange-400 font-bold text-sm tracking-wider uppercase">Control Operativo:</span>
+          </div>
+          <div class="w-full sm:w-72">
+            <label class="text-xs text-slate-300 font-bold block mb-1">Nombre del Vendedor / Operador *</label>
+            <input type="text" id="vendedor-nombre" required class="w-full border p-2 rounded text-sm text-gray-800 focus:ring-2 focus:ring-orange-500 outline-none font-semibold" placeholder="Ej: Carlos Mendoza">
+          </div>
+        </div>
+
+        <!-- Bloque Izquierdo: Datos del Cliente -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <h2 class="font-bold text-gray-700 mb-3 border-b pb-1.5 text-sm uppercase tracking-wider">Datos del Cliente</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-500 font-bold block mb-1">Nombre</label>
+              <input type="text" id="c-nombre" required class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Ej: Juan">
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 font-bold block mb-1">Apellido</label>
+              <input type="text" id="c-apellido" required class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Ej: Soto">
+            </div>
+          </div>
+          <div class="mt-3">
+            <label class="text-xs text-gray-500 font-bold block mb-1">Teléfono Móvil</label>
+            <input type="tel" id="c-telefono" required class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none" placeholder="+56912345678">
+          </div>
+          <div class="mt-3">
+            <label class="text-xs text-gray-500 font-bold block mb-1">Correo Electrónico</label>
+            <input type="email" id="c-correo" required class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none" placeholder="juan.soto@email.com">
+          </div>
+        </div>
+
+        <!-- Bloque Derecho: Datos del Vehículo -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <h2 class="font-bold text-gray-700 mb-3 border-b pb-1.5 text-sm uppercase tracking-wider">Datos del Vehículo</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-500 font-bold block mb-1">Patente (Chile)</label>
+              <input type="text" id="v-patente" maxlength="8" required class="w-full border p-2 rounded text-sm font-mono tracking-widest focus:ring-2 focus:ring-orange-500 outline-none" placeholder="AABB11" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 font-bold block mb-1">Categoría</label>
+              <div class="flex gap-1 mt-1">
+                <button type="button" id="btn-SEDÁN" onclick="cambiarCategoria('SEDÁN')" class="flex-1 py-2 px-1 rounded text-xs font-bold border transition-all bg-slate-800 text-white border-slate-800">SEDÁN</button>
+                <button type="button" id="btn-SUV" onclick="cambiarCategoria('SUV')" class="flex-1 py-2 px-1 rounded text-xs font-bold border transition-all bg-white text-gray-600 hover:bg-gray-50">SUV</button>
+                <button type="button" id="btn-XL" onclick="cambiarCategoria('XL')" class="flex-1 py-2 px-1 rounded text-xs font-bold border transition-all bg-white text-gray-600 hover:bg-gray-50">XL</button>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mt-3">
+            <div>
+              <label class="text-xs text-gray-500 font-bold block mb-1">Marca</label>
+              <input type="text" id="v-marca" required class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Ej: Toyota">
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 font-bold block mb-1">Modelo</label>
+              <input type="text" id="v-modelo" required class="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Ej: RAV4">
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo de Selección de Servicios Múltiples -->
+        <div class="md:col-span-2 bg-slate-800 p-5 rounded-xl text-white shadow-md">
+          <h2 class="font-bold mb-3 text-sm tracking-wide text-orange-400 uppercase">Selección Estricta de Catálogo (<span id="cat-actual">SEDÁN</span>)</h2>
+          <div class="flex gap-3">
+            <select id="select-servicios" class="flex-1 p-3 rounded-lg text-sm bg-white font-semibold text-gray-700 outline-none">
+              <!-- Se llena automáticamente -->
+            </select>
+            <button type="button" onclick="agregarServicioAOrden()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 rounded-lg text-xs tracking-wider transition-all uppercase">Agregar Servicio</button>
+          </div>
+
+          <!-- Tabla de Servicios Añadidos -->
+          <div class="mt-5 bg-slate-700 rounded-lg overflow-hidden border border-slate-600">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-900 text-xs text-gray-400 uppercase font-mono">
+                <tr>
+                  <th class="p-3">Servicio Añadido</th>
+                  <th class="p-3 text-right">Precio</th>
+                  <th class="p-3 text-center w-20">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="lista-servicios-cuerpo">
+                <!-- Se llena dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Módulo de Descuento Especial -->
+          <div class="mt-4 pt-3 border-t border-slate-600 flex justify-end items-center gap-3">
+            <label class="text-xs font-bold text-gray-300 uppercase font-sans">Aplicar Descuento Comercial (CLP):</label>
+            <div class="relative w-40">
+              <span class="absolute left-3 top-2 text-gray-500 font-bold text-sm">$</span>
+              <input type="number" id="descuento-monto" min="0" value="0" oninput="recalcularConDescuento()" class="w-full bg-white text-gray-800 pl-7 pr-3 py-1.5 rounded text-sm font-mono font-bold border-2 border-slate-500 outline-none focus:border-orange-500">
+            </div>
+          </div>
+
+          <!-- Desglose de Totales acumulados -->
+          <div class="grid grid-cols-4 gap-4 mt-4 bg-slate-900 p-4 rounded-lg text-center font-mono">
+            <div>
+              <span class="text-xs text-gray-400 block font-sans">VALOR NETO</span>
+              <span class="text-base font-bold text-gray-200" id="total-neto">$0</span>
+            </div>
+            <div>
+              <span class="text-xs text-gray-400 block font-sans">IVA (19%)</span>
+              <span class="text-base font-bold text-gray-200" id="total-iva">$0</span>
+            </div>
+            <div>
+              <span class="text-xs text-red-400 block font-sans font-bold">DESCUENTO</span>
+              <span class="text-base font-bold text-red-400" id="total-descuento">-$0</span>
+            </div>
+            <div class="bg-orange-600 rounded p-1 shadow-inner flex flex-col justify-center">
+              <span class="text-xs text-orange-100 block font-sans font-bold">TOTAL FINAL</span>
+              <span class="text-xl font-black text-white" id="total-bruto">$0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Forma de Pago y Botón Final -->
+        <div class="md:col-span-2 flex justify-between items-center bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <div class="flex gap-4 items-center">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Método de Pago:</span>
+            <label class="flex items-center gap-1.5 text-sm font-semibold cursor-pointer"><input type="radio" name="pago" value="TARJETA" checked> Tarjeta</label>
+            <label class="flex items-center gap-1.5 text-sm font-semibold cursor-pointer"><input type="radio" name="pago" value="TRANSFERENCIA"> Transferencia</label>
+            <label class="flex items-center gap-1.5 text-sm font-semibold cursor-pointer text-green-700"><input type="radio" name="pago" value="EFECTIVO"> Efectivo</label>
+          </div>
+          <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all text-sm tracking-wider uppercase">Registrar Venta y Emitir Ticket</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ESTILOS EXCLUSIVOS PARA IMPRESIÓN TÉRMICA DE 80MM -->
+    <style>
+      @media print {
+        body * { display: none !important; }
+        #ticket-termico, #ticket-termico * { display: block !important; }
+        #ticket-termico { position: absolute; left: 0; top: 0; width: 80mm !important; padding: 4mm; font-family: 'Courier New', Courier, monospace !important; color: #000 !important; background: white !important; }
+        #ticket-termico table { display: table !important; width: 100% !important; }
+        #ticket-termico tr { display: table-row !important; }
+        #ticket-termico td, #ticket-termico th { display: table-cell !important; }
+        #ticket-termico img { display: block !important; }
+      }
+    </style>
+
+    <!-- COMPONENTE OCULTO DE TICKET TÉRMICO DE 80MM -->
+    <div id="ticket-termico" class="hidden">
+      <div style="text-align: center; font-weight: bold; font-size: 16px; letter-spacing: 1px;">ECOCLEAN CAR</div>
+      <div style="text-align: center; font-size: 11px; margin-bottom: 8px;">Santiago, Chile — Lavado Ecológico</div>
+      <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+      <p style="margin: 3px 0; font-size: 11px;"><strong>ORDEN N°:</strong> #<span id="t-id"></span></p>
+      <p style="margin: 3px 0; font-size: 11px;"><strong>Fecha:</strong> <span id="t-fecha"></span></p>
+      <p style="margin: 3px 0; font-size: 11px;"><strong>Atendido por:</strong> <span id="t-vendedor"></span></p>
+      <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+      <p style="margin: 3px 0; font-size: 11px;"><strong>Cliente:</strong> <span id="t-cliente"></span></p>
+      <p style="margin: 3px 0; font-size: 11px;"><strong>Patente:</strong> <span id="t-patente"></span></p>
+      <p style="margin: 3px 0; font-size: 11px;"><strong>Vehículo:</strong> <span id="t-vehiculo"></span></p>
+      <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+      
+      <table style="width: 100%; font-size: 11px; margin: 5px 0; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px dashed #000;">
+            <th style="text-align: left; padding-bottom: 4px;">Detalle Servicio</th>
+            <th style="text-align: right; padding-bottom: 4px;">Total</th>
+          </tr>
+        </thead>
+        <tbody id="t-servicios-cuerpo">
+          <!-- Dinámico -->
+        </tbody>
+      </table>
+      
+      <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+      <div id="ticket-descuento-fila" style="text-align: right; font-size: 11px; margin: 2px 0; display:none;">
+        Descuento Comercial: -$<span id="t-descuento">0</span>
+      </div>
+      <div style="text-align: right; font-weight: bold; font-size: 13px; margin: 4px 0;">
+        TOTAL PAGADO: $<span id="t-total"></span>
+      </div>
+      <p style="font-size: 10px; margin: 2px 0;">Medio de Pago: <span id="t-pago"></span></p>
+      <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
+      
+      <!-- SECCIÓN INFERIOR: MENSAJE AMABLE A LA IZQUIERDA Y QR COMPACTO A LA DERECHA -->
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <tr>
+          <td style="width: 65%; vertical-align: middle; padding-right: 5px;">
+            <p style="font-size: 9px; line-height: 1.3; font-style: italic; font-weight: bold; color: #333;">
+              🌱 ¡Muchas gracias por tu confianza! Comunícate con nosotros escaneando el código QR de al lado para consultar de forma directa sobre el avance y estado de tu vehículo.
+            </p>
+          </td>
+          <td style="width: 35%; text-align: right; vertical-align: middle;">
+            <!-- QR tamaño compacto de 28mm ideal para la esquina inferior derecha -->
+            <img id="t-qr" src="" alt="QR Asistencia" style="width: 28mm; height: 28mm; display: inline-block; border: 1px solid #000; padding: 1px;">
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- CONTROL CENTRAL DE PRECIOS E INTERFAZ -->
+    <script>
+      const CATALOGO_PRECIOS = {
+        'SEDÁN': [
+          { nombre: 'Lavado Exterior', precio: 9990 },
+          { nombre: 'Lavado Full Interior + Exterior Premium', precio: 19990 },
+          { nombre: 'Limpieza de Tapiz (incluye Higienización)', precio: 27990 },
+          { nombre: 'Limpieza y Protección de Motor', precio: 15990 },
+          { nombre: 'Higienización Aire Acondicionado', precio: 14990 }
+        ],
+        'SUV': [
+          { nombre: 'Lavado Exterior', precio: 12990 },
+          { nombre: 'Lavado Full Interior + Exterior Premium', precio: 23990 },
+          { nombre: 'Limpieza de Tapiz (incluye Higienización)', precio: 34990 },
+          { nombre: 'Limpieza y Protección de Motor', precio: 16990 },
+          { nombre: 'Higienización Aire Acondicionado', precio: 14990 }
+        ],
+        'XL': [
+          { nombre: 'Lavado Exterior', precio: 14990 },
+          { nombre: 'Lavado Full Interior + Exterior Premium', precio: 25990 },
+          { nombre: 'Limpieza de Tapiz (incluye Higienización)', precio: 37990 },
+          { nombre: 'Limpieza y Protección de Motor', precio: 16990 },
+          { nombre: 'Higienización Aire Acondicionado', precio: 14990 }
+        ]
+      };
+
+      let categoriaActual = 'SEDÁN';
+      let serviciosAgregados = [];
+      let totalBrutoBase = 0;
+
+      function actualizarDropdown() {
+        const select = document.getElementById('select-servicios');
+        select.innerHTML = '';
+        CATALOGO_PRECIOS[categoriaActual].forEach((serv, index) => {
+          const opt = document.createElement('option');
+          opt.value = index;
+          opt.textContent = `${serv.nombre} — $${serv.precio.toLocaleString('es-CL')}`;
+          select.appendChild(opt);
+        });
+      }
+
+      function cambiarCategoria(nuevaCat) {
+        if (serviciosAgregados.length > 0) {
+          if (!confirm("Cambiar la categoría del vehículo vaciará la lista de servicios actuales de la orden. ¿Continuar?")) return;
+        }
+        categoriaActual = nuevaCat;
+        serviciosAgregados = [];
+        document.getElementById('descuento-monto').value = 0;
+        document.getElementById('cat-actual').textContent = nuevaCat;
+        
+        ['SEDÁN', 'SUV', 'XL'].forEach(cat => {
+          const btn = document.getElementById(`btn-${cat}`);
+          if(cat === nuevaCat) {
+            btn.className = "flex-1 py-2 px-1 rounded text-xs font-bold border transition-all bg-slate-800 text-white border-slate-800";
+          } else {
+            btn.className = "flex-1 py-2 px-1 rounded text-xs font-bold border transition-all bg-white text-gray-600 hover:bg-gray-50";
+          }
+        });
+        
+        actualizarDropdown();
+        renderizarTablaServicios();
+      }
+
+      function agregarServicioAOrden() {
+        const idx = document.getElementById('select-servicios').value;
+        const servicio = CATALOGO_PRECIOS[categoriaActual][idx];
+        
+        if (serviciosAgregados.some(s => s.nombre === servicio.nombre)) {
+          alert("Este servicio ya fue agregado a la orden actual.");
+          return;
+        }
+
+        serviciosAgregados.push(servicio);
+        renderizarTablaServicios();
+      }
+
+      function removerServicio(index) {
+        serviciosAgregados.splice(index, 1);
+        renderizarTablaServicios();
+      }
+
+      function renderizarTablaServicios() {
+        const cuerpo = document.getElementById('lista-servicios-cuerpo');
+        cuerpo.innerHTML = '';
+        
+        if(serviciosAgregados.length === 0) {
+          cuerpo.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-400 italic">No hay servicios agregados. Selecciona uno del menú de arriba.</td></tr>`;
+          totalBrutoBase = 0;
+          recalcularTotales(0, 0);
+          return;
+        }
+
+        totalBrutoBase = 0;
+        serviciosAgregados.forEach((serv, index) => {
+          totalBrutoBase += serv.precio;
+          const tr = document.createElement('tr');
+          tr.className = "border-b border-slate-600 hover:bg-slate-700/50";
+          tr.innerHTML = `
+            <td class="p-3 font-semibold">${serv.nombre}</td>
+            <td class="p-3 text-right font-mono">$${serv.precio.toLocaleString('es-CL')}</td>
+            <td class="p-3 text-center"><button type="button" onclick="removerServicio(${index})" class="text-red-400 hover:text-red-500 font-bold text-xs">Eliminar</button></td>
+          `;
+          cuerpo.appendChild(tr);
+        });
+
+        recalcularConDescuento();
+      }
+
+      function recalcularConDescuento() {
+        let descuento = parseInt(document.getElementById('descuento-monto').value) || 0;
+        
+        if (descuento < 0) {
+          descuento = 0;
+          document.getElementById('descuento-monto').value = 0;
+        }
+
+        if (descuento > totalBrutoBase && totalBrutoBase > 0) {
+          alert("El descuento no puede ser mayor que el total de los servicios.");
+          descuento = totalBrutoBase;
+          document.getElementById('descuento-monto').value = totalBrutoBase;
+        }
+
+        recalcularTotales(totalBrutoBase, descuento);
+      }
+
+      function recalcularTotales(subtotalBruto, montoDescuento) {
+        const totalFinal = Math.max(0, subtotalBruto - montoDescuento);
+        const neto = Math.round(totalFinal / 1.19);
+        const iva = totalFinal - neto;
+
+        document.getElementById('total-neto').textContent = `$${neto.toLocaleString('es-CL')}`;
+        document.getElementById('total-iva').textContent = `$${iva.toLocaleString('es-CL')}`;
+        document.getElementById('total-descuento').textContent = `-$${montoDescuento.toLocaleString('es-CL')}`;
+        document.getElementById('total-bruto').textContent = `$${totalFinal.toLocaleString('es-CL')}`;
+      }
+
+      function procesarVenta(e) {
+        e.preventDefault();
+        if(serviciosAgregados.length === 0) {
+          alert("Debe agregar al menos un servicio del catálogo antes de emitir.");
+          return;
+        }
+
+        const idOrden = Math.floor(100000 + Math.random() * 900000);
+        const fechaStr = new Date().toLocaleString('es-CL');
+        const patente = document.getElementById('v-patente').value;
+        const descuentoVal = parseInt(document.getElementById('descuento-monto').value) || 0;
+        const totalFinal = Math.max(0, totalBrutoBase - descuentoVal);
+        const tipoPago = document.querySelector('input[name="pago"]:checked').value;
+        const nombreVendedor = document.getElementById('vendedor-nombre').value;
+
+        // Carga de datos al Ticket Térmico Físico
+        document.getElementById('t-id').textContent = idOrden;
+        document.getElementById('t-fecha').textContent = fechaStr;
+        document.getElementById('t-vendedor').textContent = nombreVendedor;
+        document.getElementById('t-cliente').textContent = `${document.getElementById('c-nombre').value} ${document.getElementById('c-apellido').value}`;
+        document.getElementById('t-patente').textContent = `${patente} (${categoriaActual})`;
+        document.getElementById('t-vehiculo').textContent = `${document.getElementById('v-marca').value} ${document.getElementById('v-modelo').value}`;
+        document.getElementById('t-total').textContent = totalFinal.toLocaleString('es-CL');
+        document.getElementById('t-pago').textContent = tipoPago;
+
+        // Gestión visual del descuento en el papel físico
+        const tDescuentoFila = document.getElementById('ticket-descuento-fila');
+        if (descuentoVal > 0) {
+          tDescuentoFila.style.display = 'block';
+          document.getElementById('t-descuento').textContent = descuentoVal.toLocaleString('es-CL');
+        } else {
+          tDescuentoFila.style.display = 'none';
+        }
+
+        // Construir el detalle de servicios en el ticket
+        const tCuerpo = document.getElementById('t-servicios-cuerpo');
+        tCuerpo.innerHTML = '';
+        serviciosAgregados.forEach(s => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td style="padding: 4px 0;">${s.nombre}</td><td style="text-align: right; padding: 4px 0;">$${s.precio.toLocaleString('es-CL')}</td>`;
+          tCuerpo.appendChild(tr);
+        });
+
+        // Configuración del enlace CRM Dinámico para la API de WhatsApp de la empresa
+        const msg = `¡Hola, Ecoclean Car! ✨ Vengo de escanear mi ticket. Por favor, me gustaría consultar sobre el avance de mi vehículo patente [${patente}] con la Orden #[${idOrden}]. ¡Muchas gracias! 😊`;
+        const waUrl = `https://wa.me/56912345678?text=${encodeURIComponent(msg)}`;
+        
+        // Renderizado del código QR usando la API estable de QR Server
+        document.getElementById('t-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(waUrl)}`;
+
+        // Disparar Impresión Física
+        setTimeout(() => {
+          window.print();
+        }, 300);
+      }
+
+      // Inicialización por defecto
+      actualizarDropdown();
+      renderizarTablaServicios();
+    </script>
+</body>
+</html>
